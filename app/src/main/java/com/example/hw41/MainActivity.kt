@@ -69,11 +69,12 @@ class MainActivity : ComponentActivity() {
                     var name = parser.getAttributeValue(null, "name")
                     var picture = contxt.resources.getIdentifier(parser.getAttributeValue(null, "picture"), "drawable", contxt.packageName)
                     var description = parser.getAttributeValue(null, "description")
+                    var price = parser.getAttributeValue(null, "price")
                     var extra: List<Int> =
                         parser.getAttributeValue(null, "extra").split(" ").map { each ->
                             contxt.resources.getIdentifier(each, "drawable", contxt.packageName)
                         }
-                    productList.add(Prod(name = name, picture = picture, description = description, extra = extra, price = null))
+                    productList.add(Prod(name = name, picture = picture, description = description, extra = extra, price = price))
                 }
                 type = parser.next()
             }
@@ -87,7 +88,7 @@ class MainActivity : ComponentActivity() {
 data class Prod(
     val name: String?,
     val picture: Int?,
-    val price: Float?,
+    val price: String?,
     val description: String?,
     val extra: List<Int>?,
 )
@@ -125,18 +126,22 @@ fun productInfo(
             modifier = Modifier.width(70.dp).height(70.dp),
         )
         Spacer(modifier = Modifier.defaultMinSize(minWidth = 5.dp))
-        Text(
-            modifier = Modifier.padding(6.dp),
-            maxLines = 3,
-            text = product.name!!,
-            fontFamily = FontFamily(Font(R.font.hanzipen)),
-            softWrap = true,
-            textAlign = TextAlign.Center,
-            color = Color(0xFF040f26),
-            fontSize = 15.sp,
-            fontWeight = FontWeight.W200,
-            overflow = TextOverflow.Ellipsis,
-        )
+        Column(Modifier.fillMaxWidth(0.8f).fillMaxHeight(), horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(
+                modifier = Modifier.padding(6.dp),
+                maxLines = 3,
+                text = product.name!!,
+                fontFamily = FontFamily(Font(R.font.hanzipen)),
+                softWrap = true,
+                textAlign = TextAlign.Center,
+                color = Color(0xFF040f26),
+                fontSize = 15.sp,
+                fontWeight = FontWeight.W200,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Spacer(modifier = Modifier.height(3.dp))
+            Text(text = product.price!!, fontSize = 20.sp, textAlign = TextAlign.Center)
+        }
     }
 }
 
@@ -251,94 +256,94 @@ fun shoppingList(products: List<Prod>) {
                             contentScale = ContentScale.Fit,
                             contentDescription = "Mag",
                             modifier =
-                            Modifier.fillMaxSize(0.8f).pointerInput(Unit) {
-                                awaitPointerEventScope {
-                                    val event =
-                                        awaitPointerEvent()
-                                    event.changes.forEach { it.consume() }
-                                }
-                            },
+                                Modifier.fillMaxSize(0.8f).pointerInput(Unit) {
+                                    awaitPointerEventScope {
+                                        val event =
+                                            awaitPointerEvent()
+                                        event.changes.forEach { it.consume() }
+                                    }
+                                },
                         )
                     }
-                }else{
-
-                Row(
-                    modifier = Modifier.fillMaxSize(0.9f),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                ) {
-                    Column(modifier = Modifier.fillMaxWidth(0.3f).fillMaxHeight()) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(1f).height(50.dp).padding(start = 10.dp),
-                            horizontalArrangement = Arrangement.Start,
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Image(
-                                painter = painterResource(id = R.drawable.shopping_cart),
-                                contentDescription = "Shopping Cart",
-                                modifier = Modifier.width(30.dp).height(30.dp),
-                            )
-                            Spacer(modifier = Modifier.defaultMinSize(minWidth = 10.dp))
-                            Text(
-                                text = "Cart",
-                                color = Color.DarkGray,
-                                fontSize = 30.sp,
-                                fontWeight = FontWeight.W600,
-                            )
-                        }
-
-                        LazyColumn(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                            itemsIndexed(products) { idx, prod ->
-                                productInfo(product = prod, idx = idx, callBack = { idx -> call = idx })
+                } else {
+                    Row(
+                        modifier = Modifier.fillMaxSize(0.9f),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                    ) {
+                        Column(modifier = Modifier.fillMaxWidth(0.3f).fillMaxHeight()) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(1f).height(50.dp).padding(start = 10.dp),
+                                horizontalArrangement = Arrangement.Start,
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Image(
+                                    painter = painterResource(id = R.drawable.shopping_cart),
+                                    contentDescription = "Shopping Cart",
+                                    modifier = Modifier.width(30.dp).height(30.dp),
+                                )
+                                Spacer(modifier = Modifier.defaultMinSize(minWidth = 10.dp))
+                                Text(
+                                    text = "Cart",
+                                    color = Color.DarkGray,
+                                    fontSize = 30.sp,
+                                    fontWeight = FontWeight.W600,
+                                )
                             }
-                        }
-                    }
 
-                    if (call != -1) {
-                        Column(
-                            modifier =
-                                Modifier
-                                    .fillMaxHeight()
-                                    .fillMaxWidth(0.7f)
-                                    .padding(vertical = 20.dp)
-                                    .verticalScroll(scrollState)
-                                    .clickable { call = -1 },
-                            verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                        ) {
-                            Text(
-                                text = products.get(index = call).description!!,
-                                softWrap = true,
-                                letterSpacing = 1.sp,
-                                textAlign = TextAlign.Start,
-                                color = Color.DarkGray,
-                                fontSize = 20.sp,
-                                fontWeight = FontWeight.W300,
-                            )
-
-                            Spacer(modifier = Modifier.height(20.dp))
-
-                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
-                                products.get(index = call).extra!!.map { each ->
-                                    (
-                                        Image(
-                                            modifier =
-                                                Modifier.defaultMinSize(minWidth = 100.dp, minHeight = 100.dp).pointerInput(Unit) {
-                                                    imageMag = each
-                                                },
-                                            painter = painterResource(id = each),
-                                            contentScale = ContentScale.Fit,
-                                            contentDescription = "pictures",
-                                        )
-                                    )
+                            LazyColumn(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                                itemsIndexed(products) { idx, prod ->
+                                    productInfo(product = prod, idx = idx, callBack = { idx -> call = idx })
                                 }
                             }
                         }
-                        Spacer(modifier = Modifier.defaultMinSize(minWidth = 20.dp))
+
+                        if (call != -1) {
+                            Column(
+                                modifier =
+                                    Modifier
+                                        .fillMaxHeight()
+                                        .fillMaxWidth(0.7f)
+                                        .padding(vertical = 20.dp)
+                                        .verticalScroll(scrollState)
+                                        .clickable { call = -1 },
+                                verticalArrangement = Arrangement.Center,
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                            ) {
+                                Text(
+                                    text = products.get(index = call).description!!,
+                                    softWrap = true,
+                                    letterSpacing = 1.sp,
+                                    textAlign = TextAlign.Start,
+                                    color = Color.DarkGray,
+                                    fontSize = 20.sp,
+                                    fontWeight = FontWeight.W300,
+                                )
+
+                                Spacer(modifier = Modifier.height(20.dp))
+
+                                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
+                                    products.get(index = call).extra!!.map { each ->
+                                        (
+                                            Image(
+                                                modifier =
+                                                    Modifier.defaultMinSize(minWidth = 100.dp, minHeight = 100.dp).pointerInput(Unit) {
+                                                        imageMag = each
+                                                    },
+                                                painter = painterResource(id = each),
+                                                contentScale = ContentScale.Fit,
+                                                contentDescription = "pictures",
+                                            )
+                                        )
+                                    }
+                                }
+                            }
+                            Spacer(modifier = Modifier.defaultMinSize(minWidth = 20.dp))
+                        }
                     }
                 }
             }
-        }}
+        }
         WindowWidthSizeClass.MEDIUM -> {
         }
     }
