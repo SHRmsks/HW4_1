@@ -62,6 +62,9 @@ class MainActivity : ComponentActivity() {
         setContent {
             val contxt = LocalContext.current
             val parser = contxt.resources.getXml(R.xml.products)
+            /*
+    Citation: R.xml.products are used from Amazon shopping page
+             * */
             var type = parser.eventType
             var productList: MutableList<Prod> = mutableListOf()
             while (type != XmlPullParser.END_DOCUMENT) {
